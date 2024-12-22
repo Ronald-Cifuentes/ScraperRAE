@@ -56,18 +56,18 @@ class DictionaryManager:
     def write_word(self, word, definitions):
         data = self.read_dictionary()
         if word in data:
-            print(f"La palabra '{word}' ya existe.")
+            print("La palabra ya existe.")
             return
         data[word] = {"means": definitions}
         self._write_to_file(data)
-        print(f"Palabra '{word}' añadida exitosamente.")
+        print("Palabra añadida exitosamente.")
 
     def fetch_and_save_word(self, word):
         definitions = self.get_means_rae(word)
         if definitions:
             self.write_word(word, definitions)
 
-    def fetch_and_save_words_from_file(self, filepath):
+    def fetch_and_save_words_from_file(self, filepath, start_word=None):
         if not os.path.exists(filepath):
             print(f"El archivo '{filepath}' no existe.")
             return
@@ -75,7 +75,15 @@ class DictionaryManager:
         with open(filepath, "r", encoding="utf-8") as file:
             words = file.read().splitlines()
 
-        for word in words:
+        start_index = 0
+        if start_word:
+            try:
+                start_index = words.index(start_word)
+            except ValueError:
+                print(f"La palabra '{start_word}' no se encontró en el archivo.")
+                return
+
+        for word in words[start_index:]:
             print(f"Procesando palabra: {word}")
             self.fetch_and_save_word(word)
 
@@ -88,4 +96,7 @@ class DictionaryManager:
 if __name__ == "__main__":
     manager = DictionaryManager()
     word_file = "diccionario_espanol.txt"
-    manager.fetch_and_save_words_from_file(word_file)
+
+    # Especifica desde qué palabra comenzar (opcional)
+    start_word = "acataba"  # Cambiar a la palabra deseada o dejar como None
+    manager.fetch_and_save_words_from_file(word_file, start_word=start_word)
