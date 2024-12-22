@@ -4,7 +4,7 @@ import json
 import os
 
 
-class DictionaryManager:
+class ScraperRAE:
     def __init__(self, filename="dictionary.json"):
         self.filename = filename
         if not os.path.exists(self.filename):
@@ -56,11 +56,20 @@ class DictionaryManager:
     def write_word(self, word, definitions):
         data = self.read_dictionary()
         if word in data:
-            print("La palabra ya existe.")
-            return
-        data[word] = {"means": definitions}
+            existing_means = set(data[word].get("means", []))
+            new_definitions = [d for d in definitions if d not in existing_means]
+            if new_definitions:
+                data[word]["means"].extend(new_definitions)
+                print(f"Nuevas definiciones añadidas a la palabra '{word}'.")
+            else:
+                print(
+                    f"No se encontraron nuevas definiciones para la palabra '{word}'."
+                )
+        else:
+            data[word] = {"means": definitions}
+            print("Palabra añadida exitosamente.")
+
         self._write_to_file(data)
-        print("Palabra añadida exitosamente.")
 
     def fetch_and_save_word(self, word):
         definitions = self.get_means_rae(word)
@@ -94,9 +103,9 @@ class DictionaryManager:
 
 # Uso del programa
 if __name__ == "__main__":
-    manager = DictionaryManager()
+    manager = ScraperRAE()
     word_file = "diccionario_espanol.txt"
 
     # Especifica desde qué palabra comenzar (opcional)
-    start_word = "acataba"  # Cambiar a la palabra deseada o dejar como None
+    start_word = "acecinando"  # Cambiar a la palabra deseada o dejar como None
     manager.fetch_and_save_words_from_file(word_file, start_word=start_word)
